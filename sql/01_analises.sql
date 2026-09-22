@@ -122,4 +122,65 @@ FROM pagamentos_entregues
 GROUP BY payment_type
 ORDER BY valor_total DESC;
 
+-- 7. Relação entre atraso e satisfação dos clientes
+
+SELECT
+    CASE
+        WHEN datetime(o.order_delivered_customer_date)
+             <= datetime(o.order_estimated_delivery_date)
+        THEN 'No prazo'
+        ELSE 'Com atraso'
+    END AS situacao_entrega,
+    COUNT(*) AS quantidade_avaliacoes,
+    ROUND(AVG(r.review_score), 2) AS nota_media,
+    ROUND(
+        100.0 * AVG(
+            CASE
+                WHEN r.review_score <= 2 THEN 1
+                ELSE 0
+            END
+        ),
+        2
+    ) AS percentual_notas_baixas
+FROM order_reviews AS r
+INNER JOIN orders AS o
+    ON r.order_id = o.order_id
+WHERE o.order_status = 'delivered'
+  AND o.order_delivered_customer_date IS NOT NULL
+  AND o.order_estimated_delivery_date IS NOT NULL
+GROUP BY situacao_entrega
+ORDER BY nota_media DESC;
+
+-- 8. Desempenho das entregas por estado
+
+SELECT
+    c.customer_state AS estado,
+    COUNT(DISTINCT o.order_id) AS quantidade_pedidos,
+    ROUND(
+        AVG(
+            julianday(o.order_delivered_customer_date)
+            - julianday(o.order_purchase_timestamp)
+        ),
+        2
+    ) AS tempo_medio_entrega_dias,
+    ROUND(
+        100.0 * AVG(
+            CASE
+                WHEN datetime(o.order_delivered_customer_date)
+                     <= datetime(o.order_estimated_delivery_date)
+                THEN 1
+                ELSE 0
+            END
+        ),
+        2
+    ) AS percentual_entregue_no_prazo
+FROM orders AS o
+INNER JOIN customers AS c
+    ON o.customer_id = c.customer_id
+WHERE o.order_status = 'delivered'
+  AND o.order_delivered_customer_date IS NOT NULL
+  AND o.order_purchase_timestamp IS NOT NULL
+  AND o.order_estimated_delivery_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY tempo_medio_entrega_dias DESC;
 
