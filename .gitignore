@@ -220,3 +220,4 @@ __marimo__/
 # Dados brutos do projeto
 data/raw/*.csv
 data/raw/*.zip
+data/processed/
