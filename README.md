@@ -1,5 +1,7 @@
 # Análise de Vendas de E-commerce — Olist
 
+![Dashboard de vendas Olist](dashboard_preview.png)
+
 Projeto de análise de dados de um e-commerce brasileiro, desenvolvido para identificar padrões de vendas, desempenho logístico, comportamento de pagamento e fatores relacionados à satisfação dos clientes.
 
 ## Objetivo
